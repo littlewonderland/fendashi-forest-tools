@@ -1,0 +1,1718 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>站点管理 · 芬达石森林</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='8' fill='%232c2c2c'/%3E%3Ctext x='20' y='28' text-anchor='middle' font-family='sans-serif' font-size='20' font-weight='700' fill='%23fff'%3E芬%3C/text%3E%3C/svg%3E">
+  <style>
+    /* ============================================================
+       admin page — local-only, do NOT push to GitHub
+       ============================================================ */
+    body { background: var(--bg); }
+
+    .ad-wrap {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 32px 24px 96px;
+    }
+
+    /* ---- top bar ---- */
+    .ad-top {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding-bottom: 20px;
+      margin-bottom: 24px;
+      border-bottom: 1px solid var(--border);
+      flex-wrap: wrap;
+    }
+    .ad-top h1 {
+      font-size: 22px;
+      font-weight: 700;
+      margin: 0;
+      color: var(--text);
+      letter-spacing: -0.01em;
+    }
+    .ad-top .eyebrow {
+      font-size: 11px;
+      color: var(--accent);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+    .ad-top .right {
+      margin-left: auto;
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .ad-top input.token {
+      font-family: ui-monospace, "SF Mono", Menlo, monospace;
+      font-size: 12px;
+      padding: 6px 10px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: var(--surface);
+      color: var(--text);
+      width: 220px;
+    }
+    .ad-top input.token:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-bg);
+    }
+    .ad-top label.remember {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 12px;
+      color: var(--text-2);
+      cursor: pointer;
+      user-select: none;
+    }
+
+    /* ---- tabs ---- */
+    .ad-tabs {
+      display: flex;
+      gap: 4px;
+      margin-bottom: 24px;
+      border-bottom: 1px solid var(--border);
+    }
+    .ad-tab {
+      font-family: inherit;
+      font-size: 13px;
+      color: var(--text-2);
+      background: transparent;
+      border: none;
+      padding: 10px 16px;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -1px;
+      transition: all 0.15s ease;
+    }
+    .ad-tab:hover { color: var(--text); }
+    .ad-tab.is-active {
+      color: var(--text);
+      border-bottom-color: var(--accent);
+      font-weight: 500;
+    }
+
+    /* ---- posts list ---- */
+    .ad-toolbar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+    .ad-toolbar .left { display: flex; gap: 8px; align-items: center; }
+    .ad-toolbar .right { margin-left: auto; display: flex; gap: 8px; align-items: center; }
+    .ad-toolbar input.search {
+      padding: 6px 10px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 13px;
+      background: var(--surface);
+      color: var(--text);
+      width: 200px;
+      font-family: inherit;
+    }
+    .ad-toolbar input.search:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+
+    .ad-table {
+      width: 100%;
+      border-collapse: collapse;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+      font-size: 13px;
+    }
+    .ad-table th, .ad-table td {
+      text-align: left;
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .ad-table th {
+      background: var(--bg);
+      color: var(--text-2);
+      font-weight: 500;
+      font-size: 12px;
+      cursor: pointer;
+      user-select: none;
+      white-space: nowrap;
+    }
+    .ad-table th .sort-arrow {
+      display: inline-block;
+      margin-left: 4px;
+      opacity: 0.5;
+      font-size: 10px;
+    }
+    .ad-table th.is-sorted .sort-arrow { opacity: 1; color: var(--accent); }
+    .ad-table tbody tr:last-child td { border-bottom: none; }
+    .ad-table tbody tr:hover { background: var(--hover); }
+    .ad-table td { color: var(--text); }
+    .ad-table td.muted { color: var(--text-2); }
+    .ad-table td.dim { color: var(--text-3); font-size: 12px; }
+    .ad-table td.actions { white-space: nowrap; }
+    .ad-table .tag-pill {
+      display: inline-block;
+      background: var(--accent-bg);
+      color: var(--accent);
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-size: 11px;
+      font-weight: 500;
+    }
+
+    .icon-btn {
+      font-family: inherit;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      padding: 3px 7px;
+      font-size: 12px;
+      color: var(--text-2);
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .icon-btn:hover {
+      color: var(--text);
+      background: var(--bg);
+    }
+    .icon-btn.danger:hover {
+      color: #b33;
+      border-color: #e0b4b4;
+      background: #fdf3f3;
+    }
+    .icon-btn + .icon-btn { margin-left: 4px; }
+
+    .ad-stats {
+      display: flex;
+      gap: 24px;
+      margin-top: 16px;
+      padding: 14px 18px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 13px;
+      color: var(--text-2);
+    }
+    .ad-stats .stat-value { color: var(--text); font-weight: 600; }
+
+    /* ---- edit form (reuse pub form styles) ---- */
+    .ad-form {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      max-width: 720px;
+    }
+    .ad-field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .ad-field label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text);
+    }
+    .ad-field label .hint {
+      font-size: 12px;
+      font-weight: 400;
+      color: var(--text-3);
+    }
+    .ad-field input, .ad-field textarea {
+      font-family: inherit;
+      font-size: 14px;
+      color: var(--text);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 10px 12px;
+      outline: none;
+    }
+    .ad-field input:focus, .ad-field textarea:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-bg);
+    }
+    .ad-field textarea {
+      resize: vertical;
+      min-height: 80px;
+      line-height: 1.6;
+    }
+    .ad-field textarea.mono {
+      font-family: ui-monospace, "SF Mono", Menlo, monospace;
+      font-size: 13px;
+      min-height: 320px;
+    }
+    .ad-field-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+    @media (max-width: 600px) {
+      .ad-field-row { grid-template-columns: 1fr; }
+    }
+
+    .ad-actions {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      padding-top: 16px;
+      border-top: 1px solid var(--border);
+      margin-top: 8px;
+    }
+    .ad-btn {
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 500;
+      padding: 9px 18px;
+      border-radius: 6px;
+      border: 1px solid transparent;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .ad-btn-primary {
+      background: var(--accent);
+      color: #fff;
+    }
+    .ad-btn-primary:hover { background: var(--accent-2); }
+    .ad-btn-primary:disabled {
+      background: var(--text-3);
+      cursor: not-allowed;
+    }
+    .ad-btn-ghost {
+      background: transparent;
+      color: var(--text-2);
+      border-color: var(--border);
+    }
+    .ad-btn-ghost:hover { background: var(--hover); color: var(--text); }
+    .ad-btn-danger {
+      background: transparent;
+      color: #b33;
+      border-color: #e0b4b4;
+    }
+    .ad-btn-danger:hover { background: #fdf3f3; }
+
+    /* ---- status & logs ---- */
+    .ad-status {
+      margin-top: 16px;
+      padding: 14px 18px;
+      border-radius: 8px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      font-size: 13px;
+      color: var(--text-2);
+      line-height: 1.6;
+      display: none;
+    }
+    .ad-status.is-active { display: block; }
+    .ad-status.is-error { border-color: #e0b4b4; background: #fdf3f3; color: #8a3030; }
+    .ad-status.is-success { border-color: #b4d8c0; background: #f3faf5; color: #2d6b3f; }
+    .ad-status-line { margin: 3px 0; }
+    .ad-status-line.ok { color: #2d6b3f; }
+    .ad-status-line.err { color: #8a3030; }
+    .ad-status-line a {
+      color: var(--accent);
+      text-decoration: none;
+      border-bottom: 1px solid currentColor;
+    }
+    .spinner {
+      display: inline-block;
+      width: 12px;
+      height: 12px;
+      border: 2px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      vertical-align: -2px;
+      margin-right: 6px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ---- modal ---- */
+    .ad-modal-bg {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.4);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+    }
+    .ad-modal-bg.is-active { display: flex; }
+    .ad-modal {
+      background: var(--surface);
+      border-radius: 10px;
+      padding: 24px;
+      max-width: 400px;
+      width: calc(100% - 32px);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    }
+    .ad-modal h3 {
+      margin: 0 0 12px;
+      font-size: 16px;
+      color: var(--text);
+    }
+    .ad-modal p {
+      margin: 0 0 20px;
+      font-size: 14px;
+      color: var(--text-2);
+      line-height: 1.6;
+    }
+    .ad-modal .modal-actions {
+      display: flex;
+      gap: 8px;
+      justify-content: flex-end;
+    }
+
+    .empty {
+      padding: 60px 20px;
+      text-align: center;
+      color: var(--text-3);
+      font-size: 14px;
+    }
+
+
+    /* ============================================================
+       sticky action bar (fix #2) + mobile responsive (#7)
+       ============================================================ */
+    .ad-actions {
+      position: sticky;
+      bottom: 0;
+      background: var(--bg);
+      margin: 0 -24px;
+      padding: 12px 24px;
+      border-top: 1px solid var(--border);
+      border-bottom: none;
+      z-index: 10;
+      box-shadow: 0 -4px 12px rgba(0,0,0,0.04);
+    }
+    .ad-actions .left { display: flex; gap: 8px; align-items: center; }
+    .ad-actions .spacer { flex: 1; }
+    .ad-actions .dirty-dot {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #d77;
+      margin-right: 6px;
+      opacity: 0;
+      transition: opacity 0.15s;
+    }
+    .ad-actions .dirty-dot.is-on { opacity: 1; }
+    .ad-actions .dirty-text {
+      font-size: 12px;
+      color: var(--text-3);
+      opacity: 0;
+      transition: opacity 0.15s;
+    }
+    .ad-actions .dirty-text.is-on { opacity: 1; }
+
+    /* empty state (fix #11) */
+    .empty-state {
+      padding: 40px 20px;
+      text-align: center;
+      color: var(--text-3);
+      font-size: 14px;
+      line-height: 1.7;
+    }
+    .empty-state .hint { color: var(--text-2); font-size: 13px; margin-top: 8px; }
+
+    /* preview button + preview modal */
+    .preview-modal-bg {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 200;
+      padding: 20px;
+    }
+    .preview-modal-bg.is-active { display: flex; }
+    .preview-modal {
+      background: var(--surface);
+      border-radius: 10px;
+      max-width: 800px;
+      width: 100%;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    }
+    .preview-modal-head {
+      position: sticky;
+      top: 0;
+      background: var(--surface);
+      padding: 14px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      z-index: 1;
+    }
+    .preview-modal-head h3 { margin: 0; font-size: 15px; color: var(--text); }
+    .preview-modal-head .spacer { flex: 1; }
+    .preview-modal-body { padding: 24px; }
+    .preview-modal-body .meta {
+      font-size: 12px;
+      color: var(--text-3);
+      margin-bottom: 12px;
+    }
+    .preview-modal-body .meta .tag-pill {
+      display: inline-block;
+      background: var(--accent-bg);
+      color: var(--accent);
+      padding: 2px 10px;
+      border-radius: 10px;
+      font-size: 11px;
+      font-weight: 500;
+      margin-right: 8px;
+    }
+    .preview-modal-body h1 { font-size: 22px; color: var(--text); margin: 0 0 12px; }
+    .preview-modal-body h2 {
+      font-size: 16px; color: var(--text); margin: 20px 0 8px;
+      padding-left: 12px;
+      border-left: 3px solid var(--accent);
+    }
+    .preview-modal-body p { color: var(--text); line-height: 1.7; margin: 8px 0; }
+    .preview-modal-body ul, .preview-modal-body ol { color: var(--text); line-height: 1.7; padding-left: 24px; }
+    .preview-modal-body blockquote {
+      margin: 12px 0;
+      padding: 10px 16px;
+      border-left: 3px solid var(--accent);
+      background: var(--accent-bg);
+      color: var(--text);
+      border-radius: 0 4px 4px 0;
+    }
+    .preview-modal-body strong { color: var(--text); font-weight: 600; }
+
+    /* ============================================================
+       mobile responsive (< 700px)
+       ============================================================ */
+    @media (max-width: 700px) {
+      .ad-wrap { padding: 16px 14px 100px; }
+      .ad-top { flex-direction: column; align-items: stretch; gap: 12px; }
+      .ad-top h1 { font-size: 18px; }
+      .ad-top .right { width: 100%; flex-wrap: wrap; }
+      .ad-top input.token { width: 100%; }
+      .ad-toolbar { flex-direction: column; align-items: stretch; }
+      .ad-toolbar .right { margin-left: 0; }
+      .ad-toolbar input.search { width: 100%; }
+      .ad-tabs { overflow-x: auto; flex-wrap: nowrap; }
+      .ad-tab { white-space: nowrap; padding: 10px 12px; font-size: 12px; }
+
+      /* table → card layout */
+      .ad-table thead { display: none; }
+      .ad-table, .ad-table tbody, .ad-table tr, .ad-table td {
+        display: block;
+        width: 100%;
+      }
+      .ad-table { background: transparent; border: none; }
+      .ad-table tbody tr {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        margin-bottom: 12px;
+        padding: 12px 14px;
+      }
+      .ad-table td {
+        padding: 3px 0;
+        border: none;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .ad-table td::before {
+        content: attr(data-label);
+        flex: 0 0 56px;
+        font-size: 11px;
+        color: var(--text-3);
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+      }
+      .ad-table td.actions { padding-top: 8px; border-top: 1px dashed var(--border); margin-top: 6px; }
+      .ad-table td.actions::before { display: none; }
+      .ad-table td.actions .icon-btn {
+        padding: 6px 10px;
+        font-size: 13px;
+      }
+
+      /* form */
+      .ad-form { gap: 14px; }
+      .ad-field-row { grid-template-columns: 1fr; gap: 14px; }
+      .ad-field input, .ad-field textarea { font-size: 16px; } /* iOS no-zoom */
+
+      /* sticky actions on mobile: thinner */
+      .ad-actions { padding: 10px 14px; }
+      .ad-actions .ad-btn { padding: 8px 14px; font-size: 13px; }
+
+      /* stats wrap */
+      .ad-stats { flex-wrap: wrap; gap: 14px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="ad-wrap">
+
+  <!-- top bar -->
+  <div class="ad-top">
+    <div>
+      <div class="eyebrow">本地工具</div>
+      <h1>站点管理</h1>
+    </div>
+    <div class="right">
+      <input type="password" id="ad-token" class="token" placeholder="GitHub PAT (ghp_… 或 github_pat_…)">
+      <label class="remember"><input type="checkbox" id="ad-remember"> 记住</label>
+      <button class="icon-btn" id="btnRefresh" title="刷新">↻</button>
+    </div>
+  </div>
+
+  <!-- tabs -->
+  <div class="ad-tabs">
+    <button class="ad-tab is-active" data-tab="posts">文章</button>
+    <button class="ad-tab" data-tab="settings">站点设置</button>
+    <a class="ad-tab" href="./publish.html" style="text-decoration:none;">+ 发新文章</a>
+  </div>
+
+  <!-- ============= POSTS VIEW ============= -->
+  <div class="ad-view" id="view-posts">
+    <div class="ad-toolbar">
+      <div class="left">
+        <input type="text" id="ad-search" class="search" placeholder="筛选标题 / slug / 标签">
+      </div>
+      <div class="right">
+        <span id="postCount" style="font-size:12px;color:var(--text-3);"></span>
+      </div>
+    </div>
+
+    <table class="ad-table" id="postTable">
+      <thead>
+        <tr>
+          <th data-sort="date" style="width:110px;">日期 <span class="sort-arrow">▼</span></th>
+          <th data-sort="title">标题 <span class="sort-arrow"></span></th>
+          <th data-sort="tag" style="width:90px;">标签 <span class="sort-arrow"></span></th>
+          <th data-sort="views" style="width:70px;text-align:right;">阅读 <span class="sort-arrow"></span></th>
+          <th data-sort="comments" style="width:70px;text-align:right;">留言 <span class="sort-arrow"></span></th>
+          <th data-sort="slug" class="dim" style="width:160px;">slug <span class="sort-arrow"></span></th>
+          <th style="width:180px;">操作</th>
+        </tr>
+      </thead>
+      <tbody id="postTbody"></tbody>
+    </table>
+
+    <div class="ad-stats" id="adStats"></div>
+
+    <div class="ad-status" id="adStatus"></div>
+  </div>
+
+  <!-- ============= EDIT VIEW ============= -->
+  <div class="ad-view" id="view-edit" style="display:none;">
+    <div style="margin-bottom:16px;">
+      <a href="#/" class="icon-btn" id="editBackBtn">← 返回列表</a>
+      <span id="editSlugBadge" style="margin-left:12px;font-family:ui-monospace,Menlo,monospace;font-size:12px;color:var(--text-3);"></span>
+    </div>
+
+    <form class="ad-form" id="editForm">
+      <div class="ad-field-row">
+        <div class="ad-field">
+          <label>标题 <span class="hint">必填</span></label>
+          <input name="title" required>
+        </div>
+        <div class="ad-field">
+          <label>标签</label>
+          <input name="tag">
+        </div>
+      </div>
+
+      <div class="ad-field-row">
+        <div class="ad-field">
+          <label>Slug <span class="hint">改了会重命名文件，旧 URL 会失效</span></label>
+          <input name="slug" required pattern="[a-z0-9][a-z0-9-]*[a-z0-9]">
+        </div>
+        <div class="ad-field">
+          <label>日期</label>
+          <input name="date" type="date" required>
+        </div>
+      </div>
+
+      <div class="ad-field-row">
+        <div class="ad-field">
+          <label>阅读数</label>
+          <input name="views" type="number" min="0">
+        </div>
+        <div class="ad-field">
+          <label>留言数</label>
+          <input name="comments" type="number" min="0">
+        </div>
+      </div>
+
+      <div class="ad-field">
+        <label>摘要 <span class="hint">首页卡片显示</span></label>
+        <textarea name="summary" rows="2"></textarea>
+      </div>
+
+      <div class="ad-field">
+        <label>正文 <span class="hint">HTML（支持 h2 / p / ul / ol / blockquote / strong / em）</span></label>
+        <textarea name="content" class="mono" required></textarea>
+      </div>
+
+      <div class="ad-actions">
+        <span class="dirty-dot" id="editDirtyDot"></span>
+        <span class="dirty-text" id="editDirtyText">未保存</span>
+        <span class="spacer"></span>
+        <button type="button" class="ad-btn ad-btn-ghost" id="btnPreviewEdit">预览</button>
+        <button type="button" class="ad-btn ad-btn-ghost" id="btnResetEdit">还原</button>
+        <button type="submit" class="ad-btn ad-btn-primary" id="btnSaveEdit">保存</button>
+        <button type="button" class="ad-btn ad-btn-danger" id="btnDeleteEdit">删除</button>
+      </div>
+    </form>
+
+    <div class="ad-status" id="editStatus"></div>
+  </div>
+
+  <!-- ============= SETTINGS VIEW ============= -->
+  <div class="ad-view" id="view-settings" style="display:none;">
+    <p style="font-size:13px;color:var(--text-2);margin:0 0 16px;">
+      改这里会直接改 <code>index.html</code> 里的侧栏文字。保存后会触发 Pages 重建。
+    </p>
+
+    <form class="ad-form" id="settingsForm">
+      <div class="ad-field">
+        <label>站名 <span class="hint">侧栏和顶栏显示</span></label>
+        <input name="brandName">
+      </div>
+
+      <div class="ad-field">
+        <label>关于简介</label>
+        <textarea name="profileText" rows="3"></textarea>
+      </div>
+
+      <div class="ad-field-row">
+        <div class="ad-field">
+          <label>统计 · 篇数</label>
+          <input name="statPosts">
+        </div>
+        <div class="ad-field">
+          <label>统计 · 阅读</label>
+          <input name="statViews">
+        </div>
+        <div class="ad-field">
+          <label>统计 · 留言</label>
+          <input name="statComments">
+        </div>
+      </div>
+
+      <div class="ad-field-row">
+        <div class="ad-field">
+          <label>底部链接 1</label>
+          <input name="footerLink1">
+        </div>
+        <div class="ad-field">
+          <label>底部链接 2</label>
+          <input name="footerLink2">
+        </div>
+        <div class="ad-field">
+          <label>底部链接 3</label>
+          <input name="footerLink3">
+        </div>
+      </div>
+
+      <div class="ad-actions">
+        <span class="dirty-dot" id="setDirtyDot"></span>
+        <span class="dirty-text" id="setDirtyText">未保存</span>
+        <span class="spacer"></span>
+        <button type="button" class="ad-btn ad-btn-ghost" id="btnAutoStats" title="从 posts.json 自动填">自动算统计</button>
+        <button type="button" class="ad-btn ad-btn-ghost" id="btnResetSettings">还原</button>
+        <button type="submit" class="ad-btn ad-btn-primary">保存设置</button>
+      </div>
+    </form>
+
+    <div class="ad-status" id="settingsStatus"></div>
+  </div>
+
+</div>
+
+
+<!-- ============= PREVIEW MODAL ============= -->
+<div class="preview-modal-bg" id="previewModalBg">
+  <div class="preview-modal">
+    <div class="preview-modal-head">
+      <h3>预览</h3>
+      <span class="spacer"></span>
+      <button class="ad-btn ad-btn-ghost" id="previewClose">关闭</button>
+    </div>
+    <div class="preview-modal-body" id="previewModalBody"></div>
+  </div>
+</div>
+
+<!-- ============= MODAL ============= -->
+<div class="ad-modal-bg" id="modalBg">
+  <div class="ad-modal">
+    <h3 id="modalTitle">确认</h3>
+    <p id="modalBody"></p>
+    <div class="modal-actions">
+      <button class="ad-btn ad-btn-ghost" id="modalCancel">取消</button>
+      <button class="ad-btn ad-btn-danger" id="modalConfirm">确认</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  const REPO = 'littlewonderland/fendashi-forest';
+  const BRANCH = 'main';
+  const TOKEN_KEY = 'fendashi-admin-token';
+
+  const $ = (id) => document.getElementById(id);
+
+  // ============================================================
+  // state
+  // ============================================================
+  let state = {
+    posts: [],         // posts.json entries
+    postsSha: null,    // for updating posts.json
+    indexHtml: null,   // raw index.html text
+    indexSha: null,    // for updating index.html
+    sortKey: 'date',
+    sortDir: 'desc',
+    filter: '',
+  };
+
+  // ============================================================
+  // token
+  // ============================================================
+  const tokenEl = $('ad-token');
+  const rememberEl = $('ad-remember');
+  try {
+    const saved = localStorage.getItem(TOKEN_KEY);
+    if (saved) { tokenEl.value = saved; rememberEl.checked = true; }
+  } catch (e) {}
+  function persistToken() {
+    try {
+      if (rememberEl.checked && tokenEl.value.trim()) {
+        localStorage.setItem(TOKEN_KEY, tokenEl.value);
+      } else if (!rememberEl.checked) {
+        localStorage.removeItem(TOKEN_KEY);
+      }
+    } catch (e) {}
+  }
+  rememberEl.addEventListener('change', persistToken);
+  tokenEl.addEventListener('input', persistToken);
+  // Also persist on any action button click (covers paste + immediate click flows)
+  document.addEventListener('click', (e) => {
+    if (e.target.closest('button, a')) persistToken();
+  }, true);
+  const getToken = () => tokenEl.value.trim();
+
+  // ============================================================
+  // dirty tracking + unsaved-changes warning
+  // ============================================================
+  let isDirty = false;
+  function setDirty(d) {
+    isDirty = d;
+    document.querySelectorAll('.dirty-dot, .dirty-text').forEach((el) => {
+      el.classList.toggle('is-on', d);
+    });
+  }
+  function bindDirtyTracking(form) {
+    if (!form) return;
+    const initial = {};
+    Array.from(form.elements).forEach((el) => {
+      if (el.name) initial[el.name] = el.value;
+    });
+    form._initial = initial;
+    Array.from(form.elements).forEach((el) => {
+      if (!el.name) return;
+      el.addEventListener('input', () => {
+        const cur = el.value;
+        setDirty(cur !== form._initial[el.name]);
+      });
+    });
+  }
+  function resetDirty(form) {
+    if (!form) return;
+    Array.from(form.elements).forEach((el) => {
+      if (el.name) {
+        form._initial[el.name] = el.value;
+      }
+    });
+    setDirty(false);
+  }
+  // browser-level warning on tab close / refresh
+  window.addEventListener('beforeunload', (e) => {
+    if (isDirty) { e.preventDefault(); e.returnValue = ''; return ''; }
+  });
+  // SPA-level: intercept in-app navigation (tab clicks, hash change, back link)
+  function safeNavigate(fn) {
+    if (isDirty && !confirm('有未保存的修改，确定要离开吗？')) return;
+    setDirty(false);
+    fn();
+  }
+
+  // ============================================================
+  // github helpers (same as publish.html)
+  // ============================================================
+  async function ghApi(path, method, body, token) {
+    const res = await fetch(`https://api.github.com${path}`, {
+      method,
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Accept': 'application/vnd.github.v3+json',
+        'Content-Type': 'application/json',
+      },
+      body: body ? JSON.stringify(body) : undefined,
+    });
+    const text = await res.text();
+    let json = null;
+    try { json = text ? JSON.parse(text) : null; } catch (e) {}
+    if (!res.ok) {
+      const msg = json && json.message ? json.message : text || res.statusText;
+      throw new Error(`GitHub ${method} ${path} → ${res.status}: ${msg}`);
+    }
+    return json;
+  }
+
+  async function getFile(path, token) {
+    try {
+      const r = await ghApi(`/repos/${REPO}/contents/${path}?ref=${BRANCH}`, 'GET', null, token);
+      return { sha: r.sha, content: r.content ? atob(r.content.replace(/\n/g, '')) : null };
+    } catch (e) {
+      if (/404/.test(String(e))) return { sha: null, content: null };
+      throw e;
+    }
+  }
+
+  async function putFile(path, content, message, sha, token) {
+    const body = {
+      message,
+      content: btoa(unescape(encodeURIComponent(content))),
+      branch: BRANCH,
+    };
+    if (sha) body.sha = sha;
+    return ghApi(`/repos/${REPO}/contents/${path}`, 'PUT', body, token);
+  }
+
+  async function deleteFile(path, sha, message, token) {
+    return ghApi(`/repos/${REPO}/contents/${path}`, 'DELETE', { sha, message, branch: BRANCH }, token);
+  }
+
+  async function triggerPagesBuild(token) {
+    return ghApi(`/repos/${REPO}/pages/builds`, 'POST', {}, token);
+  }
+
+  async function waitForBuild(token, timeoutMs = 60000) {
+    const start = Date.now();
+    while (Date.now() - start < timeoutMs) {
+      const r = await ghApi(`/repos/${REPO}/pages/builds/latest`, 'GET', null, token);
+      if (r && r.status === 'built') return r;
+      if (r && r.status === 'errored') throw new Error('Pages build errored');
+      await new Promise((res) => setTimeout(res, 2000));
+    }
+    throw new Error('Build timed out');
+  }
+
+  // ============================================================
+  // status helpers
+  // ============================================================
+  function setStatus(targetId, lines, opts = {}) {
+    const el = $(targetId);
+    el.className = 'ad-status is-active'
+      + (opts.error ? ' is-error' : '')
+      + (opts.success ? ' is-success' : '');
+    el.innerHTML = lines.map((l) => {
+      if (typeof l === 'string') return `<div class="ad-status-line">${l}</div>`;
+      return `<div class="ad-status-line ${l.cls || ''}">${l.html}</div>`;
+    }).join('');
+  }
+  function log(msg, cls) { return { html: msg, cls: cls || '' }; }
+
+  // ============================================================
+  // routing
+  // ============================================================
+  function route() {
+    const hash = location.hash || '#/';
+    const isEdit = hash.startsWith('#/edit/');
+    const isSettings = hash === '#/settings';
+
+    $('view-posts').style.display = (!isEdit && !isSettings) ? '' : 'none';
+    $('view-edit').style.display = isEdit ? '' : 'none';
+    $('view-settings').style.display = isSettings ? '' : 'none';
+
+    document.querySelectorAll('.ad-tab[data-tab]').forEach((t) => {
+      t.classList.toggle('is-active',
+        (t.dataset.tab === 'posts' && !isEdit && !isSettings) ||
+        (t.dataset.tab === 'settings' && isSettings));
+    });
+
+    if (isEdit) {
+      const slug = decodeURIComponent(hash.slice('#/edit/'.length));
+      loadEditView(slug);
+    } else if (isSettings) {
+      loadSettingsView();
+    }
+  }
+  window.addEventListener('hashchange', route);
+
+  // ============================================================
+  // load posts
+  // ============================================================
+  async function refresh() {
+    const token = getToken();
+    if (!token) { setStatus('adStatus', [log('先填 Token', 'err')], { error: true }); return; }
+
+    setStatus('adStatus', [log('<span class="spinner"></span>从 GitHub 拉 posts.json…')]);
+    try {
+      const r = await getFile('posts.json', token);
+      if (!r.content) throw new Error('posts.json 不存在');
+      const data = JSON.parse(r.content);
+      // schema: { meta, posts: [] }
+      state.posts = Array.isArray(data.posts) ? data.posts : (Array.isArray(data) ? data : []);
+      state.postsMeta = data.meta || {};
+      state.postsSha = r.sha;
+      renderPosts();
+      renderStats();
+      setStatus('adStatus', [log(`✓ 已加载 ${state.posts.length} 篇文章`, 'ok')]);
+    } catch (e) {
+      setStatus('adStatus', [log('✗ ' + e.message, 'err')], { error: true });
+    }
+  }
+
+  $('btnRefresh').addEventListener('click', refresh);
+
+  // ============================================================
+  // render posts table
+  // ============================================================
+  function renderPosts() {
+    const tbody = $('postTbody');
+    const filter = state.filter.toLowerCase().trim();
+    let rows = state.posts.slice();
+
+    if (filter) {
+      rows = rows.filter((p) =>
+        (p.title || '').toLowerCase().includes(filter) ||
+        (p.slug || '').toLowerCase().includes(filter) ||
+        (p.tag || '').toLowerCase().includes(filter)
+      );
+    }
+
+    rows.sort((a, b) => {
+      const k = state.sortKey;
+      let va = a[k], vb = b[k];
+      if (k === 'views' || k === 'comments') { va = +va || 0; vb = +vb || 0; }
+      else { va = String(va || ''); vb = String(vb || ''); }
+      if (va < vb) return state.sortDir === 'asc' ? -1 : 1;
+      if (va > vb) return state.sortDir === 'asc' ? 1 : -1;
+      return 0;
+    });
+
+    // sort indicators
+    document.querySelectorAll('.ad-table th[data-sort]').forEach((th) => {
+      const arrow = th.querySelector('.sort-arrow');
+      if (th.dataset.sort === state.sortKey) {
+        th.classList.add('is-sorted');
+        arrow.textContent = state.sortDir === 'asc' ? '▲' : '▼';
+      } else {
+        th.classList.remove('is-sorted');
+        arrow.textContent = '';
+      }
+    });
+
+    if (rows.length === 0) {
+      if (filter) {
+        tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state">没匹配的文章<br><span class="hint">换个关键词试试</span></div></td></tr>`;
+      } else if (state.posts.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state">还没加载文章<br><span class="hint">点右上角 ↻ 从 GitHub 拉取，或去 <a href="./publish.html" style="color:var(--accent);">发新文章</a></span></div></td></tr>`;
+      } else {
+        tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state">还没文章<br><span class="hint">去 <a href="./publish.html" style="color:var(--accent);">发第一篇</a></span></div></td></tr>`;
+      }
+    } else {
+      tbody.innerHTML = rows.map((p, idx) => {
+        const origIdx = state.posts.indexOf(p);
+        return `
+          <tr data-slug="${escapeAttr(p.slug)}">
+            <td data-label="日期" class="dim">${escapeHtml(p.date || '')}</td>
+            <td data-label="标题">${escapeHtml(p.title || '')}</td>
+            <td data-label="标签"><span class="tag-pill">${escapeHtml((p.tags && p.tags[0]) || p.tag || '笔记')}</span></td>
+            <td data-label="阅读" class="muted">${p.views || 0}</td>
+            <td data-label="留言" class="muted">${p.comments || 0}</td>
+            <td data-label="slug" class="dim" style="display:none;">${escapeHtml(p.slug || '')}</td>
+            <td data-label="操作" class="actions">
+              <button class="icon-btn" data-act="up" title="上移">↑</button>
+              <button class="icon-btn" data-act="down" title="下移">↓</button>
+              <button class="icon-btn" data-act="edit" title="编辑">编辑</button>
+              <button class="icon-btn danger" data-act="del" title="删除">删</button>
+              <a class="icon-btn" href="https://littlewonderland.github.io/fendashi-forest/posts/${escapeAttr(p.slug)}.html" target="_blank" title="查看线上">↗</a>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    $('postCount').textContent = `${rows.length} / ${state.posts.length} 篇`;
+  }
+
+  $('postTbody').addEventListener('click', (e) => {
+    const btn = e.target.closest('button[data-act]');
+    if (!btn) return;
+    const row = btn.closest('tr');
+    const slug = row && row.dataset.slug;
+    if (!slug) return;
+    const idx = state.posts.findIndex((p) => p.slug === slug);
+    if (idx === -1) return;
+    const act = btn.dataset.act;
+    if (act === 'edit') {
+      safeNavigate(() => { location.hash = `#/edit/${encodeURIComponent(slug)}`; });
+    } else if (act === 'del') {
+      confirmDelete(slug, idx);
+    } else if (act === 'up' && idx > 0) {
+      reorderPosts(idx, idx - 1);
+    } else if (act === 'down' && idx < state.posts.length - 1) {
+      reorderPosts(idx, idx + 1);
+    }
+  });
+
+  document.querySelectorAll('.ad-table th[data-sort]').forEach((th) => {
+    th.addEventListener('click', () => {
+      const k = th.dataset.sort;
+      if (state.sortKey === k) state.sortDir = state.sortDir === 'asc' ? 'desc' : 'asc';
+      else { state.sortKey = k; state.sortDir = (k === 'views' || k === 'comments') ? 'desc' : 'desc'; }
+      renderPosts();
+    });
+  });
+
+  $('ad-search').addEventListener('input', (e) => {
+    state.filter = e.target.value;
+    renderPosts();
+  });
+
+  function renderStats() {
+    const total = state.posts.length;
+    const views = state.posts.reduce((s, p) => s + (+p.views || 0), 0);
+    const comments = state.posts.reduce((s, p) => s + (+p.comments || 0), 0);
+    const lastDate = state.posts.length
+      ? state.posts.map((p) => p.date).filter(Boolean).sort().slice(-1)[0]
+      : '-';
+    $('adStats').innerHTML = `
+      <span><span class="stat-value">${total}</span> 篇文章</span>
+      <span><span class="stat-value">${views.toLocaleString()}</span> 总阅读</span>
+      <span><span class="stat-value">${comments}</span> 总留言</span>
+      <span>最新：<span class="stat-value">${lastDate}</span></span>
+    `;
+  }
+
+  // ============================================================
+  // reorder (push to GitHub)
+  // ============================================================
+  async function reorderPosts(from, to) {
+    const token = getToken();
+    if (!token) { setStatus('adStatus', [log('先填 Token', 'err')], { error: true }); return; }
+    const [item] = state.posts.splice(from, 1);
+    state.posts.splice(to, 0, item);
+
+    setStatus('adStatus', [
+      log(`<span class="spinner"></span>重新排序并推到 GitHub…`),
+    ]);
+
+    try {
+      const data = { meta: Object.assign({}, state.postsMeta || {}, { updated_at: new Date().toISOString() }), posts: state.posts };
+      const newJson = JSON.stringify(data, null, 2) + '\n';
+      await putFile('posts.json', newJson, `chore: reorder posts`, state.postsSha, token);
+      state.postsSha = (await getFile('posts.json', token)).sha;
+      await triggerPagesBuild(token);
+      await waitForBuild(token, 60000);
+      setStatus('adStatus', [log('✓ 已重新排序', 'ok')], { success: true });
+      renderPosts();
+    } catch (e) {
+      setStatus('adStatus', [log('✗ ' + e.message, 'err')], { error: true });
+      // revert
+      const [item2] = state.posts.splice(to, 1);
+      state.posts.splice(from, 0, item2);
+      renderPosts();
+    }
+  }
+
+  // ============================================================
+  // edit view
+  // ============================================================
+  let editState = { currentSlug: null, originalSlug: null, sha: null, postHtml: null };
+
+  async function loadEditView(slug) {
+    const token = getToken();
+    if (!token) {
+      setStatus('editStatus', [log('先填 Token', 'err')], { error: true });
+      location.hash = '#/';
+      return;
+    }
+
+    $('editSlugBadge').textContent = slug;
+    const meta = state.posts.find((p) => p.slug === slug);
+    if (!meta) {
+      setStatus('editStatus', [log('找不到这篇文章', 'err')], { error: true });
+      location.hash = '#/';
+      return;
+    }
+
+    setStatus('editStatus', [log('<span class="spinner"></span>加载文章…')]);
+
+    try {
+      const f = await getFile(`posts/${slug}.html`, token);
+      if (!f.content) throw new Error('文章文件不存在');
+      editState.currentSlug = slug;
+      editState.originalSlug = slug;
+      editState.sha = f.sha;
+      editState.postHtml = f.content;
+
+      // fill form — posts.json uses `tags` (array) + `excerpt`
+      const form = $('editForm');
+      form.title.value = meta.title || '';
+      form.tag.value = (meta.tags && meta.tags[0]) || meta.tag || '笔记';
+      form.slug.value = meta.slug || '';
+      form.date.value = meta.date || '';
+      form.views.value = meta.views || 0;
+      form.comments.value = meta.comments || 0;
+      form.summary.value = meta.excerpt || meta.summary || '';
+      form.content.value = extractPostContent(f.content);
+
+      setStatus('editStatus', [log('✓ 已加载，可编辑', 'ok')]);
+      bindDirtyTracking($('editForm'));
+      setDirty(false);
+      // focus first field
+      setTimeout(() => $('editForm').title.focus(), 100);
+      // warn before navigating away with hashchange
+      editState.boundHash = true;
+    } catch (e) {
+      setStatus('editStatus', [log('✗ ' + e.message, 'err')], { error: true });
+      location.hash = '#/';
+    }
+  }
+
+  function extractPostContent(html) {
+    // extract content between <div class="post-content"> and </div>
+    const m = html.match(/<div class="post-content">([\s\S]*?)<\/div>\s*<div class="post-page-footer">/);
+    if (!m) return '';
+    return m[1].trim();
+  }
+
+  function buildPostHtml(meta, contentHtml) {
+    const AMP = String.fromCharCode(38);
+    const LT  = String.fromCharCode(60);
+    const GT  = String.fromCharCode(62);
+    const QUOT = String.fromCharCode(34);
+    const SEMI = String.fromCharCode(59);
+    const esc = (s) => String(s).replace(new RegExp(AMP, 'g'), AMP + 'amp' + SEMI).replace(new RegExp(LT, 'g'), AMP + 'lt' + SEMI).replace(new RegExp(GT, 'g'), AMP + 'gt' + SEMI).replace(new RegExp(QUOT, 'g'), AMP + 'quot' + SEMI);
+    const titleFull = meta.title;
+    const tag = meta.tag || '笔记';
+    const date = meta.date;
+    const views = meta.views;
+    const comments = meta.comments;
+
+    return [
+      '<!DOCTYPE html>',
+      '<html lang="zh-CN">',
+      '<head>',
+      '  <meta charset="UTF-8">',
+      '  <meta name="viewport" content="width=device-width, initial-scale=1.0">',
+      '  <title>' + esc(titleFull) + ' · 芬达石森林</title>',
+      '  <link rel="stylesheet" href="../style.css">',
+      '  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 40 40\'%3E%3Crect width=\'40\' height=\'40\' rx=\'8\' fill=\'%232c2c2c\'/%3E%3Ctext x=\'20\' y=\'28\' text-anchor=\'middle\' font-family=\'sans-serif\' font-size=\'20\' font-weight=\'700\' fill=\'%23fff\'%3E芬%3C/text%3E%3C/svg%3E">',
+      '</head>',
+      '<body>',
+      '',
+      '<div class="bg-canvas" aria-hidden="true">',
+      '  <svg style="top: 8%; left: 6%; width: 80px;" viewBox="0 0 100 100">',
+      '    <ellipse cx="50" cy="65" rx="22" ry="25"/>',
+      '    <ellipse cx="50" cy="40" rx="15" ry="20"/>',
+      '    <ellipse cx="42" cy="22" rx="3.5" ry="14" transform="rotate(-8 42 22)"/>',
+      '    <ellipse cx="58" cy="22" rx="3.5" ry="14" transform="rotate(8 58 22)"/>',
+      '  </svg>',
+      '  <svg style="top: 24%; right: 8%; width: 100px;" viewBox="0 0 130 70">',
+      '    <path d="M 15 50 Q 10 25 40 22 Q 80 18 105 28 Q 118 30 118 42 Q 118 54 105 56 Q 80 62 40 58 Q 18 56 15 50 Z"/>',
+      '    <path d="M 60 22 Q 65 8 75 10 Q 80 12 78 18 Q 72 22 65 22"/>',
+      '  </svg>',
+      '  <svg style="top: 60%; left: 12%; width: 70px;" viewBox="0 0 100 100">',
+      '    <ellipse cx="50" cy="60" rx="22" ry="28"/>',
+      '    <circle cx="50" cy="35" r="20"/>',
+      '    <path d="M 32 28 L 28 12 L 40 22"/>',
+      '    <path d="M 68 28 L 72 12 L 60 22"/>',
+      '  </svg>',
+      '  <svg style="top: 78%; right: 12%; width: 70px;" viewBox="0 0 100 60">',
+      '    <path d="M 18 42 Q 8 42 8 32 Q 8 22 20 22 Q 22 12 36 14 Q 42 6 54 10 Q 68 8 70 20 Q 84 18 88 28 Q 96 32 90 42 Q 90 50 78 50 L 22 50 Q 12 50 18 42 Z"/>',
+      '  </svg>',
+      '</div>',
+      '',
+      '<header class="topbar">',
+      '  <div class="topbar-brand">',
+      '    <div class="brand-avatar">芬</div>',
+      '    <span class="brand-name">芬达石森林</span>',
+      '  </div>',
+      '  <div class="topbar-actions">',
+      '    <button class="topbar-btn" id="themeBtnMobile" aria-label="主题">',
+      '      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>',
+      '    </button>',
+      '  </div>',
+      '</header>',
+      '',
+      '<div class="layout">',
+      '',
+      '  <aside class="sidebar">',
+      '    <div class="brand">',
+      '      <div class="brand-avatar">芬</div>',
+      '      <span class="brand-name">芬达石森林</span>',
+      '    </div>',
+      '    <nav class="nav" aria-label="主导航">',
+      '      <a class="nav-item" href="../index.html">',
+      '        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3 7h7l-5.5 4.5L18 21l-6-4-6 4 1.5-7.5L2 9h7z"/></svg>',
+      '        常用',
+      '      </a>',
+      '      <a class="nav-item" href="#">留言</a>',
+      '      <a class="nav-item" href="#">相册</a>',
+      '      <a class="nav-item" href="#">归档</a>',
+      '      <a class="nav-item" href="#">友圈</a>',
+      '      <a class="nav-item" href="#">友链</a>',
+      '    </nav>',
+      '  </aside>',
+      '',
+      '  <main class="main">',
+      '    <article class="post-page">',
+      '      <a class="post-page-back" href="../index.html">',
+      '        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>',
+      '        返回',
+      '      </a>',
+      '',
+      '      <span class="post-page-tag">' + esc(tag) + '</span>',
+      '      <h1 class="post-page-title">' + esc(titleFull) + '</h1>',
+      '',
+      '      <div class="post-page-meta">',
+      '        <span>' + esc(date) + '</span>',
+      '        <span style="color: var(--border);">·</span>',
+      '        <span>👁 ' + views + '</span>',
+      '        <span style="color: var(--border);">·</span>',
+      '        <span>💬 ' + comments + '</span>',
+      '      </div>',
+      '',
+      '      <div class="post-content">',
+      contentHtml,
+      '      </div>',
+      '',
+      '      <div class="post-page-footer">',
+      '        <a href="../index.html">← 回到首页</a>',
+      '        <span>© 芬达石森林 2026</span>',
+      '      </div>',
+      '    </article>',
+      '  </main>',
+      '</div>',
+      '',
+      '<script>',
+      '  const saved = localStorage.getItem(\'fendashi-theme\') || \'light\';',
+      '  document.documentElement.setAttribute(\'data-theme\', saved);',
+      '  const btn = document.getElementById(\'themeBtnMobile\');',
+      '  if (btn) btn.addEventListener(\'click\', () => {',
+      '    const cur = document.documentElement.getAttribute(\'data-theme\');',
+      '    const next = cur === \'dark\' ? \'light\' : \'dark\';',
+      '    document.documentElement.setAttribute(\'data-theme\', next);',
+      '    localStorage.setItem(\'fendashi-theme\', next);',
+      '  });',
+      '<' + '/script>',
+      '</body>',
+      '</html>',
+      ''
+    ].join('\n');
+  }
+
+  function escapeHtml(s) {
+    const AMP = String.fromCharCode(38);
+    const LT  = String.fromCharCode(60);
+    const GT  = String.fromCharCode(62);
+    const QUOT = String.fromCharCode(34);
+    const SEMI = String.fromCharCode(59);
+    return String(s).replace(new RegExp(AMP, 'g'), AMP + 'amp' + SEMI)
+                    .replace(new RegExp(LT, 'g'), AMP + 'lt' + SEMI)
+                    .replace(new RegExp(GT, 'g'), AMP + 'gt' + SEMI)
+                    .replace(new RegExp(QUOT, 'g'), AMP + 'quot' + SEMI);
+  }
+  function escapeAttr(s) {
+    return escapeHtml(s);
+  }
+
+  $('editForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const token = getToken();
+    if (!token) { setStatus('editStatus', [log('先填 Token', 'err')], { error: true }); return; }
+
+    const form = $('editForm');
+    const meta = {
+      title: form.title.value.trim(),
+      tag: form.tag.value.trim() || '笔记',  // kept locally; mapped to tags[] at save
+      slug: form.slug.value.trim(),
+      date: form.date.value,
+      views: parseInt(form.views.value, 10) || 0,
+      comments: parseInt(form.comments.value, 10) || 0,
+      summary: form.summary.value.trim(),
+      content: form.content.value.trim(),
+    };
+
+    if (!meta.title) return setStatus('editStatus', [log('标题不能为空', 'err')], { error: true });
+    if (!/^[a-z0-9][a-z0-9-]*[a-z0-9]$/.test(meta.slug)) {
+      return setStatus('editStatus', [log('Slug 格式不对', 'err')], { error: true });
+    }
+    if (!meta.content) return setStatus('editStatus', [log('正文不能为空', 'err')], { error: true });
+
+    const btn = $('btnSaveEdit');
+    btn.disabled = true;
+    btn.textContent = '保存中…';
+
+    try {
+      setStatus('editStatus', [log('<span class="spinner"></span>1/3 推送新 HTML…')]);
+
+      const newHtml = buildPostHtml(meta, meta.content);
+
+      // check if slug changed → need to delete old file + create new
+      const slugChanged = meta.slug !== editState.originalSlug;
+      if (slugChanged) {
+        // delete old
+        await deleteFile(`posts/${editState.originalSlug}.html`, editState.sha, `delete: ${editState.originalSlug}`, token);
+      }
+      // put new (create or update)
+      const newSha = (await putFile(
+        `posts/${meta.slug}.html`,
+        newHtml,
+        `post: ${meta.title}` + (slugChanged ? ' (renamed)' : ''),
+        slugChanged ? null : editState.sha,
+        token
+      )).content.sha;
+
+      setStatus('editStatus', [
+        log('✓ 1/3 HTML 已推送', 'ok'),
+        log('<span class="spinner"></span>2/3 更新 posts.json…'),
+      ]);
+
+      // update posts.json: change meta in place (or replace slug entry)
+      const idx = state.posts.findIndex((p) => p.slug === editState.originalSlug);
+      if (idx === -1) throw new Error('posts.json 找不到旧条目');
+      // map to schema: tags[] + excerpt + path (preserve any extra fields via Object.assign base first)
+      state.posts[idx] = Object.assign({}, state.posts[idx], meta, {
+        tags: [meta.tag],
+        excerpt: meta.summary,
+        path: `posts/${meta.slug}.html`,
+      });
+      const data = { meta: Object.assign({}, state.postsMeta || {}, { updated_at: new Date().toISOString() }), posts: state.posts };
+      const newJson = JSON.stringify(data, null, 2) + '\n';
+      state.postsSha = (await putFile(
+        'posts.json',
+        newJson,
+        `chore: update ${meta.slug}` + (slugChanged ? ' (slug change)' : ''),
+        state.postsSha,
+        token
+      )).content.sha;
+
+      setStatus('editStatus', [
+        log('✓ 1/3 HTML 已推送', 'ok'),
+        log('✓ 2/3 posts.json 已更新', 'ok'),
+        log('<span class="spinner"></span>3/3 触发 Pages 重建…'),
+      ]);
+
+      await triggerPagesBuild(token);
+      const build = await waitForBuild(token, 60000);
+
+      const liveUrl = `https://littlewonderland.github.io/fendashi-forest/posts/${meta.slug}.html`;
+      setStatus('editStatus', [
+        log('✓ 1/3 HTML 已推送', 'ok'),
+        log('✓ 2/3 posts.json 已更新', 'ok'),
+        log('✓ 3/3 Pages 已重建', 'ok'),
+        log('<br><b style="color:var(--text);">🎉 保存成功</b>'),
+        log(`线上：<a href="${liveUrl}" target="_blank">${liveUrl}</a>`),
+        log(`耗时：${Math.round((build.duration || 0) / 1000)}s · commit：<code>${(build.commit || '').slice(0,7)}</code>`),
+      ], { success: true });
+
+      editState.currentSlug = meta.slug;
+      editState.originalSlug = meta.slug;
+      editState.sha = newSha;
+      $('editSlugBadge').textContent = meta.slug;
+      // reset dirty tracking with new initial values
+      resetDirty($('editForm'));
+
+      btn.disabled = false;
+      btn.textContent = '保存';
+    } catch (err) {
+      setStatus('editStatus', [log('✗ ' + err.message, 'err'), log('提示：检查 Token 是否有 Contents + Administration R/W', 'err')], { error: true });
+      btn.disabled = false;
+      btn.textContent = '保存';
+    }
+  });
+
+  $('editBackBtn').addEventListener('click', (e) => { e.preventDefault(); location.hash = '#/'; });
+
+  $('btnDeleteEdit').addEventListener('click', () => {
+    const slug = editState.currentSlug;
+    if (!slug) return;
+    confirmDelete(slug, state.posts.findIndex((p) => p.slug === slug), () => { location.hash = '#/'; });
+  });
+
+  // ============================================================
+  // delete
+  // ============================================================
+  function confirmDelete(slug, idx, onDone) {
+    showModal(
+      '删除文章？',
+      `确定要删除「${slug}」？这个操作会删掉文件 posts/${slug}.html 并从 posts.json 移除。30 秒后线上也看不到了。`,
+      async () => {
+        const token = getToken();
+        if (!token) { setStatus('adStatus', [log('先填 Token', 'err')], { error: true }); return; }
+        try {
+          const f = await getFile(`posts/${slug}.html`, token);
+          await deleteFile(`posts/${slug}.html`, f.sha, `delete: ${slug}`, token);
+          // remove from posts.json
+          state.posts.splice(idx, 1);
+          const data = { meta: Object.assign({}, state.postsMeta || {}, { updated_at: new Date().toISOString() }), posts: state.posts };
+          const newJson = JSON.stringify(data, null, 2) + '\n';
+          state.postsSha = (await putFile('posts.json', newJson, `chore: remove ${slug}`, state.postsSha, token)).content.sha;
+          await triggerPagesBuild(token);
+          await waitForBuild(token, 60000);
+          setStatus('adStatus', [log('✓ 已删除', 'ok')], { success: true });
+          renderPosts();
+          renderStats();
+          if (onDone) onDone();
+        } catch (e) {
+          setStatus('adStatus', [log('✗ ' + e.message, 'err')], { error: true });
+        }
+      }
+    );
+  }
+
+  function showModal(title, body, onConfirm) {
+    $('modalTitle').textContent = title;
+    $('modalBody').textContent = body;
+    $('modalBg').classList.add('is-active');
+    const confirm = $('modalConfirm');
+    const cancel = $('modalCancel');
+    const close = () => {
+      $('modalBg').classList.remove('is-active');
+      confirm.removeEventListener('click', confirmFn);
+      cancel.removeEventListener('click', close);
+    };
+    const confirmFn = async () => {
+      close();
+      await onConfirm();
+    };
+    confirm.addEventListener('click', confirmFn);
+    cancel.addEventListener('click', close);
+  }
+
+  // ============================================================
+  // tabs (Posts / Settings)
+  // ============================================================
+  document.querySelectorAll('.ad-tab[data-tab]').forEach((t) => {
+    t.addEventListener('click', () => {
+      safeNavigate(() => {
+        location.hash = t.dataset.tab === 'settings' ? '#/settings' : '#/';
+      });
+    });
+  });
+
+  // ============================================================
+  // settings view
+  // ============================================================
+  async function loadSettingsView() {
+    const token = getToken();
+    if (!token) {
+      setStatus('settingsStatus', [log('先填 Token', 'err')], { error: true });
+      return;
+    }
+    setStatus('settingsStatus', [log('<span class="spinner"></span>加载 index.html…')]);
+    try {
+      const f = await getFile('index.html', token);
+      if (!f.content) throw new Error('index.html 不存在');
+      state.indexHtml = f.content;
+      state.indexSha = f.sha;
+
+      const form = $('settingsForm');
+      // parse current values
+      const brandMatch = f.content.match(/<span class="brand-name">([^<]+)<\/span>/);
+      form.brandName.value = brandMatch ? brandMatch[1] : '芬达石森林';
+
+      const profileMatch = f.content.match(/<p class="profile-text">([^<]+)<\/p>/);
+      form.profileText.value = profileMatch ? profileMatch[1] : '';
+
+      const stats = f.content.match(/<strong>([^<]+)<\/strong>/g) || [];
+      form.statPosts.value = (stats[0] || '').replace(/<\/?strong>/g, '');
+      form.statViews.value = (stats[1] || '').replace(/<\/?strong>/g, '');
+      form.statComments.value = (stats[2] || '').replace(/<\/?strong>/g, '');
+
+      const footers = f.content.match(/<div class="sidebar-footer">([\s\S]*?)<\/div>/);
+      if (footers) {
+        const links = footers[1].match(/<a href="#">([^<]+)<\/a>/g) || [];
+        form.footerLink1.value = (links[0] || '').replace(/<[^>]+>/g, '');
+        form.footerLink2.value = (links[1] || '').replace(/<[^>]+>/g, '');
+        form.footerLink3.value = (links[2] || '').replace(/<[^>]+>/g, '');
+      }
+
+      setStatus('settingsStatus', [log('✓ 已加载当前设置', 'ok')]);
+      bindDirtyTracking($('settingsForm'));
+      setDirty(false);
+    } catch (e) {
+      setStatus('settingsStatus', [log('✗ ' + e.message, 'err')], { error: true });
+    }
+  }
+
+  $('settingsForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const token = getToken();
+    if (!token) { setStatus('settingsStatus', [log('先填 Token', 'err')], { error: true }); return; }
+
+    if (!state.indexHtml || !state.indexSha) {
+      await loadSettingsView();
+      if (!state.indexHtml) return;
+    }
+
+    const form = $('settingsForm');
+    const brand = form.brandName.value.trim() || '芬达石森林';
+    const bio = form.profileText.value.trim();
+    const s1 = form.statPosts.value.trim() || '0';
+    const s2 = form.statViews.value.trim() || '0';
+    const s3 = form.statComments.value.trim() || '0';
+    const f1 = form.footerLink1.value.trim() || '关于本站';
+    const f2 = form.footerLink2.value.trim() || 'RSS 订阅';
+    const f3 = form.footerLink3.value.trim() || '联系';
+
+    let html = state.indexHtml;
+    // replace brand (first occurrence, in topbar)
+    html = html.replace(/<span class="brand-name">[^<]+<\/span>/, '<span class="brand-name">' + escapeHtml(brand) + '</span>');
+    // profile text
+    html = html.replace(/<p class="profile-text">[^<]*<\/p>/, '<p class="profile-text">' + escapeHtml(bio) + '</p>');
+    // stats
+    html = html.replace(
+      /<div class="profile-stats">[\s\S]*?<\/div>/,
+      '<div class="profile-stats">\n        <div><strong>' + escapeHtml(s1) + '</strong>篇</div>\n        <div><strong>' + escapeHtml(s2) + '</strong>阅读</div>\n        <div><strong>' + escapeHtml(s3) + '</strong>留言</div>\n      </div>'
+    );
+    // footer
+    html = html.replace(
+      /<div class="sidebar-footer">[\s\S]*?<\/div>/,
+      '<div class="sidebar-footer">\n      <a href="#">' + escapeHtml(f1) + '</a>\n      <a href="#">' + escapeHtml(f2) + '</a>\n      <a href="#">' + escapeHtml(f3) + '</a>\n    </div>'
+    );
+
+    setStatus('settingsStatus', [log('<span class="spinner"></span>1/2 推 index.html…')]);
+    try {
+      const r = await putFile('index.html', html, 'chore: update site settings', state.indexSha, token);
+      state.indexSha = r.content.sha;
+      state.indexHtml = html;
+      setStatus('settingsStatus', [
+        log('✓ 1/2 index.html 已推送', 'ok'),
+        log('<span class="spinner"></span>2/2 触发 Pages 重建…'),
+      ]);
+      await triggerPagesBuild(token);
+      await waitForBuild(token, 60000);
+      setStatus('settingsStatus', [
+        log('✓ 1/2 index.html 已推送', 'ok'),
+        log('✓ 2/2 Pages 已重建', 'ok'),
+        log('<br><b style="color:var(--text);">🎉 设置已保存</b>'),
+      ], { success: true });
+      resetDirty($('settingsForm'));
+    } catch (e) {
+      setStatus('settingsStatus', [log('✗ ' + e.message, 'err')], { error: true });
+    }
+  });
+
+  // ============================================================
+  // preview in edit view + reset buttons + auto-stats
+  // ============================================================
+  $('btnPreviewEdit').addEventListener('click', () => {
+    const form = $('editForm');
+    const meta = {
+      title: form.title.value.trim() || '(无标题)',
+      tag: form.tag.value.trim() || '笔记',
+      slug: form.slug.value.trim() || 'preview',
+      date: form.date.value || '2026-01-01',
+      views: parseInt(form.views.value, 10) || 0,
+      comments: parseInt(form.comments.value, 10) || 0,
+      content: form.content.value.trim() || '<p>（无内容）</p>',
+    };
+    const body = $('previewModalBody');
+    body.innerHTML = `
+      <div class="meta">
+        <span class="tag-pill">${escapeHtml(meta.tag)}</span>
+        ${escapeHtml(meta.date)} · 👁 ${meta.views} · 💬 ${meta.comments}
+      </div>
+      <h1>${escapeHtml(meta.title)}</h1>
+      ${meta.content}
+    `;
+    $('previewModalBg').classList.add('is-active');
+  });
+  $('previewClose').addEventListener('click', () => $('previewModalBg').classList.remove('is-active'));
+  $('previewModalBg').addEventListener('click', (e) => {
+    if (e.target === $('previewModalBg')) $('previewModalBg').classList.remove('is-active');
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && $('previewModalBg').classList.contains('is-active')) {
+      $('previewModalBg').classList.remove('is-active');
+    }
+  });
+
+  $('btnResetEdit').addEventListener('click', () => {
+    if (!confirm('放弃所有修改，恢复到初始值？')) return;
+    const form = $('editForm');
+    Object.entries(form._initial || {}).forEach(([k, v]) => {
+      const el = form.elements[k];
+      if (el) el.value = v;
+    });
+    setDirty(false);
+  });
+  $('btnResetSettings').addEventListener('click', () => {
+    if (!confirm('放弃所有修改，恢复到初始值？')) return;
+    const form = $('settingsForm');
+    Object.entries(form._initial || {}).forEach(([k, v]) => {
+      const el = form.elements[k];
+      if (el) el.value = v;
+    });
+    setDirty(false);
+  });
+
+  $('btnAutoStats').addEventListener('click', () => {
+    if (state.posts.length === 0) {
+      alert('还没加载文章数据，先点 ↻ 刷新');
+      return;
+    }
+    const form = $('settingsForm');
+    const total = state.posts.length;
+    const views = state.posts.reduce((s, p) => s + (+p.views || 0), 0);
+    const comments = state.posts.reduce((s, p) => s + (+p.comments || 0), 0);
+    function fmt(n) {
+      if (n < 1000) return String(n);
+      if (n < 10000) return (n / 1000).toFixed(1).replace(/\.0$/, '') + 'k';
+      return Math.round(n / 1000) + 'k';
+    }
+    form.statPosts.value = total;
+    form.statViews.value = fmt(views);
+    form.statComments.value = comments;
+    [form.statPosts, form.statViews, form.statComments].forEach((el) => {
+      el.dispatchEvent(new Event('input', { bubbles: true }));
+    });
+  });
+
+  // ============================================================
+  // init
+  // ============================================================
+  document.querySelectorAll('.ad-tab[data-tab]').forEach((t) => {
+    if (t.classList.contains('is-active')) return;
+  });
+
+  route();
+  if (location.hash === '' || location.hash === '#') location.hash = '#/';
+
+})();
+</script>
+
+</body>
+</html>

@@ -295,11 +295,18 @@
     .actions .dirty-text.is-on { opacity: 1; }
 
     @media (max-width: 700px) {
-      .pub-wrap { padding: 24px 14px 110px; }
+      .pub-wrap { padding: 24px 14px 130px; }
       .pub-title { font-size: 22px; }
       .field-row { grid-template-columns: 1fr; gap: 14px; }
       .input, .textarea { font-size: 16px; } /* iOS no-zoom */
-      .actions { padding: 10px 14px !important; margin: 0 -14px; }
+      .actions {
+        padding: 10px 14px !important;
+        margin: 0 -14px;
+        flex-wrap: wrap;
+        gap: 6px;
+      }
+      .actions .left { width: 100%; margin-bottom: 4px; }
+      .actions .spacer { display: none; }
       .actions .btn { padding: 8px 14px; font-size: 13px; }
       .actions > a { display: none; } /* hide "← 回首页" on mobile */
     }

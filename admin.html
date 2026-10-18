@@ -888,7 +888,7 @@
   async function getFile(path, token) {
     try {
       const r = await ghApi(`/repos/${REPO}/contents/${path}?ref=${BRANCH}`, 'GET', null, token);
-      return { sha: r.sha, content: r.content ? atob(r.content.replace(/\n/g, '')) : null };
+      return { sha: r.sha, content: r.content ? new TextDecoder('utf-8').decode(Uint8Array.from(atob(r.content.replace(/\n/g, '')), c => c.charCodeAt(0))) : null };
     } catch (e) {
       if (/404/.test(String(e))) return { sha: null, content: null };
       throw e;
@@ -898,7 +898,7 @@
   async function putFile(path, content, message, sha, token) {
     const body = {
       message,
-      content: btoa(unescape(encodeURIComponent(content))),
+      content: btoa(String.fromCharCode(...new TextEncoder().encode(content))),
       branch: BRANCH,
     };
     if (sha) body.sha = sha;
